@@ -1,4 +1,4 @@
-# using module .\Task.psm1;
+using module .\Task.psm1;
 using module .\TaskData.psm1;
 using module .\Mercurial.psm1;
 using module .\Util.psm1;
@@ -29,11 +29,11 @@ function Main {
 		switch ($Action) {
 			"list" {}
 			"create" {
-				# if ([Task]::Exists($TaskID)) {
-				# 	throw "Task with ID `"$($TaskID)`" already exists";
-				# } else {
-				# 	[Task] $Task = [Task]::Create($TaskID);
-				# }
+				if ([Task]::Exists($TaskID)) {
+					throw "Task with ID `"$($TaskID)`" already exists";
+				} else {
+					[Task] $Task = [Task]::Create($TaskID, $Args[2]);
+				}
 			}
 			"delete" {}
 			"apply" {}

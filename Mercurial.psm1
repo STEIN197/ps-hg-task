@@ -17,6 +17,10 @@ class Mercurial {
 		return $Output -split " ";
 	}
 
+	[void] CreateBookmark([string] $Name) {
+		Invoke-Expression "hg bookmarks $($Name)";
+	}
+
 	static [boolean] Exists() {
 		try {
 			Get-Command "hg";
