@@ -6,4 +6,6 @@ class Task {
 		'delete'
 	);
 	static [string] $PREFIX = 'kissmedev';
+
+	static [boolean] Exists([int] $ID) {} # TODO
 }
