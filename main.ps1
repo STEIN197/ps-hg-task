@@ -37,7 +37,9 @@ function Main {
 			}
 			"delete" {}
 			"apply" {}
-			"push" {}
+			"push" {
+				[Task]::Get($TaskID).Push();
+			}
 			default {
 				throw "Unknown operation `"$($Action)`"";
 			}

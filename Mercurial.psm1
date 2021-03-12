@@ -21,6 +21,10 @@ class Mercurial {
 		Invoke-Expression "hg bookmarks $($Name)";
 	}
 
+	[void] PushBookmark([string] $Name) {
+		Invoke-Expression "hg push -B $($Name)";
+	}
+
 	static [boolean] Exists() {
 		try {
 			Get-Command "hg";

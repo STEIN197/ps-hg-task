@@ -9,6 +9,19 @@ class Task {
 	);
 	static [string] $PREFIX = 'kissmedev';
 
+	[int] $ID;
+	[string] $Description;
+
+	Task([int] $ID, [string] $Description) {
+		$this.ID = $ID;
+		$this.Description = $Description;
+	}
+
+	[void] Push() {
+		$Repo = [Mercurial]::Current();
+		$Repo.PushBookmark("$([Task]::PREFIX)-$($ID)");
+	}
+
 	static [boolean] Exists([int] $ID) {
 		$Repo = [Mercurial]::Current();
 		return $Repo.BookmarkExists("$([Task]::PREFIX)-$($ID)");
@@ -21,4 +34,6 @@ class Task {
 			# TODO
 		}
 	}
+
+	static [Task] Get([int] $TaskID) {}
 }
