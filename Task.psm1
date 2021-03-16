@@ -40,9 +40,17 @@ class Task {
 	# TODO
 	static [Task[]] Find([string] $Query) {
 		[Mercurial] $Repo = [Mercurial]::Current();
-		[int] $TaskID;
-		$Repo.Bookmarks() | % {}
-		# regex by name / desc
+		[Task[]] $Result = @();
+		$Repo.Bookmarks() | % {
+			if ($_ -match "^$([Task]::Prefix())-(\d*$($Query)\d*)$") {
+				$Result += [Task]::Get($Matches[0]);
+			}
+		}
+		if (!$Result.Length) {
+			[hashtable] $RepoConfig = [Config]::Get().Data.repositories[[Mercurial]::Current().ToString()].bookmarks;
+			# TODO regex by name / desc
+		}
+		return $Result;
 	}
 
 	# TODO
