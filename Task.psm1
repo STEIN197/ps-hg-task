@@ -1,8 +1,7 @@
+using module .\Config.psm1;
 using module .\Mercurial.psm1;
 
 class Task {
-
-	static [string] $PREFIX = 'kissmedev';
 
 	[int] $ID;
 	[string] $Description;
@@ -12,12 +11,8 @@ class Task {
 		$this.Description = $Description;
 	}
 
-	[void] Push() {
-		[Mercurial]::Current().PushBookmark("$([Task]::PREFIX)-$($this.ID)");
-	}
-
 	static [boolean] Exists([int] $ID) {
-		return [Mercurial]::Current().Bookmarks().Contains("$([Task]::PREFIX)-$($ID)");
+		return [Mercurial]::Current().Bookmarks().Contains("$([Config]::Get().Data['prefix'])-$($ID)");
 	}
 
 	# static [Task] Create([int] $ID, [string] $Description) {

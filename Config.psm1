@@ -1,6 +1,9 @@
 class Config {
 
 	static [string] $FILE_NAME = 'config.json';
+	static [string[]] $PROPERTY_RESERVED = @(
+		'repositories'
+	);
 
 	[hashtable] $Data = $null;
 	[string] $Path;
@@ -16,7 +19,10 @@ class Config {
 
 	[void] Load() {
 		$this.Data = Get-Content -Path $this.Path -Raw | ConvertFrom-Json -AsHashtable;
-		$this.Data ??= @{};
+		$this.Data ??= @{
+			prefix = 'kissmedev'
+			repositories = @()
+		};
 	}
 
 	static [boolean] Exists() {
