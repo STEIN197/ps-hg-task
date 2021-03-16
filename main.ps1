@@ -18,9 +18,6 @@ function Main {
 		[Config]::Create();
 	}
 	[string] $Action = $Args[0];
-	# if ($Args[1] -and ![Util]::IsNumeric($Args[1])) {
-	# 	throw "Task ID `"$($Args[1])`" must be a numeric identifier";
-	# }
 	[string] $ActionRegex = $Action -split '' -match '[a-z]' -join '.*';
 	$ActionRegex = "^$($ActionRegex)";
 	[CLI] | Get-Member -Static -MemberType Method | % {

@@ -2,7 +2,7 @@ class Config {
 
 	static [string] $FILE_NAME = 'config.json';
 	static [string[]] $PROPERTY_RESERVED = @(
-		'repositories'
+		'bookmarks'
 	);
 
 	[hashtable] $Data = $null;
@@ -14,14 +14,13 @@ class Config {
 	}
 
 	[void] Save() {
-		$this.Data | ConvertTo-Json | Out-File -FilePath $this.Path;
+		$this.Data | ConvertTo-Json -Depth 16 | Out-File -FilePath $this.Path;
 	}
 
 	[void] Load() {
 		$this.Data = Get-Content -Path $this.Path -Raw | ConvertFrom-Json -AsHashtable;
 		$this.Data ??= @{
-			prefix = 'kissmedev'
-			repositories = @()
+			repositories = @{}
 		};
 	}
 

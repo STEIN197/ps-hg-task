@@ -1,3 +1,5 @@
+using module .\Config.psm1;
+
 class Mercurial {
 
 	static [string] $DIR_NAME = '.hg';
@@ -6,10 +8,20 @@ class Mercurial {
 
 	Mercurial([System.IO.FileSystemInfo] $Path) {
 		$this.Path = $Path;
+		[Config] $Config = [Config]::Get();
+		if (!$Config.Data['repositories'][$this.ToString()]) {
+			$Config.Data['repositories'][$this.ToString()] = @{
+				prefix = 'task';
+				branch = 'default';
+				bookmark = 'main';
+				bookmarks = @{};
+			};
+			$Config.Save();
+		}
 	}
 
-	[boolean] BookmarkInstalled([string] $Name) {
-		return $this.Bookmarks().Contains($Name);
+	[void] Shelve() {
+		Invoke-Expression 'hg shelve -A';
 	}
 
 	[string[]] Bookmarks() {
@@ -18,11 +30,11 @@ class Mercurial {
 	}
 
 	[void] CreateBookmark([string] $Name) {
-		Invoke-Expression "hg bookmarks $($Name)";
+		Invoke-Expression "hg bookmark $($Name)";
 	}
 
-	[void] PushBookmark([string] $Name) {
-		Invoke-Expression "hg push -B $($Name)";
+	[string] ToString() {
+		return $this.Path.FullName;
 	}
 
 	static [boolean] Installed() {
