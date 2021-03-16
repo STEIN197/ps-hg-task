@@ -1,55 +1,43 @@
 using module .\Task.psm1;
-using module .\TaskData.psm1;
+using module .\Config.psm1;
 using module .\Mercurial.psm1;
 using module .\Util.psm1;
+using module .\CLI.psm1;
 
 function Main {
-	if (![Mercurial]::Exists()) {
+	if (![Mercurial]::Installed()) {
 		throw "Mercurial is not installed on this computer";
 	}
-	[Mercurial] $Mercurial = [Mercurial]::Current();
-	if (!$Mercurial) {
+	if (![Mercurial]::Current()) {
 		throw "Mercurial repository does not exist here";
-	}
-	if (![TaskData]::Exists()) {
-		[TaskData]::Create();
 	}
 	if (!$Args.Length) {
 		throw "No arguments provided";
 	}
-	[TaskData] $TaskData = [TaskData]::Get();
-	if ([Util]::IsNumeric($Args[0])) {
-
-	} else {
-		[string] $Action = $Args[0];
-		if ($Args[1] -and ![Util]::IsNumeric($Args[1])) {
-			throw "Task ID `"$($Args[1])`" must be a numeric identifier";
-		}
-		[int] $TaskID = $Args[1];
-		switch ($Action) {
-			"list" {}
-			"create" {
-				if ([Task]::Exists($TaskID)) {
-					throw "Task with ID `"$($TaskID)`" already exists";
-				} else {
-					[Task] $Task = [Task]::Create($TaskID, $Args[2]);
-				}
-			}
-			"delete" {}
-			"apply" {}
-			"push" {
-				[Task]::Get($TaskID).Push();
-			}
-			default {
-				throw "Unknown operation `"$($Action)`"";
-			}
+	if (![Config]::Exists()) {
+		[Config]::Create();
+	}
+	[string] $Action = $Args[0];
+	if ($Args[1] -and ![Util]::IsNumeric($Args[1])) {
+		throw "Task ID `"$($Args[1])`" must be a numeric identifier";
+	}
+	[string] $ActionRegex = $Action -split '' -match '[a-z]' -join '.*';
+	$ActionRegex = "^$($ActionRegex)";
+	[CLI] | Get-Member -Static -MemberType Method | % {
+		if ($_.Name -match $ActionRegex) {
+			$Action = $_.Name;
+			return;
 		}
 	}
+	if (!([CLI] | Get-Member -Name $Action -Static)) {
+		throw "Unknown operation `"$($Action)`"";
+	}
+	[CLI]::$Action($Args[1..$Args.Length]);
 }
 
 try {
 	Main @Args;
 } catch {
-	Write-Host $PSItem -ForegroundColor Red;
+	Write-Host $_ -ForegroundColor Red;
 	exit 1;
 }

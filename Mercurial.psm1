@@ -8,7 +8,7 @@ class Mercurial {
 		$this.Path = $Path;
 	}
 
-	[boolean] BookmarkExists([string] $Name) {
+	[boolean] BookmarkInstalled([string] $Name) {
 		return $this.Bookmarks().Contains($Name);
 	}
 
@@ -25,7 +25,7 @@ class Mercurial {
 		Invoke-Expression "hg push -B $($Name)";
 	}
 
-	static [boolean] Exists() {
+	static [boolean] Installed() {
 		try {
 			Get-Command "hg";
 			return $true;
@@ -35,7 +35,7 @@ class Mercurial {
 	}
 	
 	static [Mercurial] Current() {
-		if (![Mercurial]::Exists()) {
+		if (![Mercurial]::Installed()) {
 			return $null;
 		}
 		$CurrentItem = Get-Item -Path ".";
