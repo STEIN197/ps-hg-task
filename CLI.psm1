@@ -25,6 +25,9 @@ class CLI {
 	static [void] List([string[]] $params) {
 		$bookmarksConfig = (Config-Get).repositories[(Hg-Current)].bookmarks
 		Hg-Bookmarks | % {
+			if (-not ($_ -match "^$(Task-Prefix)-\d+$")) {
+				return
+			}
 			$description = $bookmarksConfig[$_]
 			$output = $_
 			if ($description) {
