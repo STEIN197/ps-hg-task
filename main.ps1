@@ -14,6 +14,10 @@ function Main {
 	if (!$action) {
 		"Unknown operation `"$($action)`""
 	}
+	Config-Setup-Hg
+	if ($action.ToLower() -ne 'config') {
+		Check-Config
+	}
 	[CLI]::$action($args[1..$args.Length])
 }
 
@@ -27,6 +31,9 @@ function Check-Setup {
 	if (-not (Config-Exists)) {
 		Config-Create
 	}
+}
+
+function Check-Config {
 	$repoConfig = (Config-Get).repositories[(Hg-Current)]
 	if (-not $repoConfig.bookmark) {
 		throw "Main bookmark property is unset";

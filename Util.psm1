@@ -33,6 +33,9 @@ function Config-Exists {
 
 function Config-Create {
 	New-Item -Path $PSScriptRoot -Name 'config.json' -ItemType 'file'
+	Config-Save @{
+		repositories = @{}
+	}
 }
 
 function Config-Path {
@@ -47,6 +50,19 @@ function Config-Get {
 
 function Config-Save([hashtable] $data) {
 	$data | ConvertTo-Json -Depth 16 | Out-File -FilePath (Config-Path);
+}
+
+function Config-Setup-Hg {
+	$config = Config-Get
+	if (!$config.repositories[(Hg-Current)]) {
+		$config.repositories[(Hg-Current)] = @{
+			branch = ''
+			prefix = ''
+			bookmark = ''
+			bookmarks = @{}
+		}
+		Config-Save $config
+	}
 }
 
 function Task-Current {
