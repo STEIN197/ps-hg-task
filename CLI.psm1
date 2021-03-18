@@ -1,6 +1,7 @@
 using module .\Task.psm1;
 using module .\Mercurial.psm1;
 using module .\Config.psm1;
+using module .\Util.psm1;
 
 class CLI {
 
@@ -38,6 +39,9 @@ class CLI {
 	}
 
 	static [void] Create([string[]] $Params) {
+		if (![Util]::IsNumeric($Params[0])) {
+			throw "Task ID `"$($Params[0])`" must be a numeric identifier";
+		}
 		[int] $TaskID = $Params[0];
 		[string] $TaskDescription = $Params[1];
 		if ([Task]::Exists($TaskID)) {
@@ -50,8 +54,18 @@ class CLI {
 
 	# TODO
 	static [void] Delete([string[]] $Params) {}
-	# TODO
-	static [void] Reset([string[]] $Params) {} # Task::current();
+
+	static [void] Reset([string[]] $Params) {
+		[Mercurial] $Repo = [Mercurial]::Current();
+		[Config] $Config = [Config]::Get();
+		[hashtable] $RepoConfig = $Config.Data.repositories[$Repo.ToString()];
+
+		if ($Repo.GetActiveBookmark() -eq $RepoConfig.bookmark) {
+			return;
+		}
+		$Repo.Shelve();
+		$Repo.Update($RepoConfig.bookmark);
+	}
 
 	static [void] Config([string[]] $Params) {
 		[string] $Key = $Params[0];

@@ -4,7 +4,6 @@ using module .\Mercurial.psm1;
 class Task {
 
 	[int] $ID;
-	[string] $Description;
 
 	Task([int] $ID) {
 		$this.ID = $ID;
@@ -37,25 +36,27 @@ class Task {
 		}
 	}
 
-	# TODO
 	static [Task[]] Find([string] $Query) {
 		[Mercurial] $Repo = [Mercurial]::Current();
 		[Task[]] $Result = @();
+		[Config] $Config = [Config]::Get();
 		$Repo.Bookmarks() | % {
-			if ($_ -match "^$([Task]::Prefix())-(\d*$($Query)\d*)$") {
-				$Result += [Task]::Get($Matches[0]);
+			if ($_ -match "^$([Task]::Prefix())-\d*$($Query)\d*$" -or $Config.Data['repositories'][$Repo.ToString()]['bookmarks'][$_] -match $Query) {
+				$Parts = $_ -split '-';
+				$Result += $Parts[$Parts.Length - 1];
 			}
-		}
-		if (!$Result.Length) {
-			[hashtable] $RepoConfig = [Config]::Get().Data.repositories[[Mercurial]::Current().ToString()].bookmarks;
-			# TODO regex by name / desc
 		}
 		return $Result;
 	}
 
 	# TODO
 	static [Task] Current() {
-		# if null else task
+		$BookmarkName = Invoke-Expression 'hg log -r . -T {activebookmark}';
+		if ($BookmarkName -match "^$([Task]::Prefix())-(\d+)$") {
+			return [Task]::New($Matches.0);
+		} else {
+			return $null;
+		}
 	}
 
 	static [string] Prefix() {

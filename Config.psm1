@@ -20,7 +20,7 @@ class Config {
 	[void] Load() {
 		$this.Data = Get-Content -Path $this.Path -Raw | ConvertFrom-Json -AsHashtable;
 		$this.Data ??= @{
-			repositories = @{}
+			repositories = @{};
 		};
 	}
 

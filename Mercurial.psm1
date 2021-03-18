@@ -11,9 +11,6 @@ class Mercurial {
 		[Config] $Config = [Config]::Get();
 		if (!$Config.Data['repositories'][$this.ToString()]) {
 			$Config.Data['repositories'][$this.ToString()] = @{
-				prefix = 'task';
-				branch = 'default';
-				bookmark = 'main';
 				bookmarks = @{};
 			};
 			$Config.Save();
@@ -24,6 +21,10 @@ class Mercurial {
 		Invoke-Expression 'hg shelve -A';
 	}
 
+	[void] Update([string] $Rev) {
+		Invoke-Expressoin "hg update $($Rev)";
+	}
+
 	[string[]] Bookmarks() {
 		$Output = Invoke-Expression 'hg bookmarks --template "{bookmark} "';
 		return $Output -split " ";
@@ -31,6 +32,11 @@ class Mercurial {
 
 	[void] CreateBookmark([string] $Name) {
 		Invoke-Expression "hg bookmark $($Name)";
+	}
+
+	[string] GetActiveBookmark() {
+		$Result = hg log -r . -A '{activebookmark}';
+		return $Result ? $Result : $null;
 	}
 
 	[string] ToString() {
