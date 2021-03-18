@@ -34,19 +34,22 @@ class CLI {
 		}
 	}
 
-	# static [void] Create([string[]] $Params) {
-	# 	if (![Util]::IsNumeric($Params[0])) {
-	# 		throw "Task ID `"$($Params[0])`" must be a numeric identifier";
-	# 	}
-	# 	[int] $TaskID = $Params[0];
-	# 	[string] $TaskDescription = $Params[1];
-	# 	if ([Task]::Exists($TaskID)) {
-	# 		throw "Task with ID `"$($TaskID)`" already exists";
-	# 	} else {
-	# 		[Mercurial]::Current().Shelve();
-	# 		[Task]::Create($TaskID, $TaskDescription);
-	# 	}
-	# }
+	static [void] Create([string[]] $params) {
+		if (!$params[0]) {
+			throw "No arguments provided"
+		}
+		if (!(Is-Numeric $params[0])) {
+			throw "Task ID `"$($params[0])`" must be a numeric identifier"
+		}
+		[int] $id = $params[0]
+		[string] $description = $params[1]
+		if (Task-Exists $id) {
+			throw "Task with ID `"$($id)`" already exists"
+		} else {
+			hg shelve -A
+			Task-Create $id $description
+		}
+	}
 
 	# # TODO
 	# static [void] Delete([string[]] $Params) {}
@@ -74,7 +77,7 @@ class CLI {
 			$config.repositories[(Hg-Current)][$key.ToLower()] = $value
 			Config-Save $config
 		} elseif ($Key) {
-			Write-Host (Config-Get).repositories[(Hg-Current)][$key.ToLower()]
+			Write-Host (Config-Get).repositories.(Hg-Current)[$key.ToLower()]
 		} else {
 			Config-Get | ConvertTo-Json -Depth 16 | Write-Host
 		}

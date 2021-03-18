@@ -81,8 +81,21 @@ function Task-Prefix {
 	return (Config-Get).repositories[(Hg-Current)].prefix
 }
 
-function Task-Create {}
-function Task-Exists {}
+function Task-Create($id, $description) {
+	$bookmark = "$(Task-Prefix)-$($id)"
+	if ((Hg-Bookmarks).Contains($bookmark)) {
+		throw "Task `"$($id)`" already exists"
+	}
+	hg bookmark $bookmark
+	if ($description) {
+		$config = Config-Get
+		$config.repositories.(Hg-Current).bookmarks.$bookmark = $description
+		Config-Save $config
+	}
+}
+function Task-Exists($id) {
+	return (Hg-Bookmarks).Contains("$(Task-Prefix)-$($id)");
+}
 function Task-Find {}
 
 Export-ModuleMember -Function *
