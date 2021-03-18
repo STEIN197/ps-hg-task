@@ -1,29 +1,20 @@
-using module .\Util.psm1;
-# using module .\CLI.psm1;
+using module .\CLI.psm1
+Import-Module $PSScriptRoot\Util -DisableNameChecking
 
 function Main {
 	Check-Setup
-	return
-	# if (!$args.Length) {
-	# 	[Task] $CurrentTask = [Task]::Current();
-	# 	if ($CurrentTask) {
-	# 		Write-Host "$($CurrentTask)`t$($CurrentTask.Description)";
-	# 	}
-	# 	return;
-	# }
-	# [string] $Action = $Args[0];
-	# [string] $ActionRegex = $Action -split '' -match '[a-z]' -join '.*';
-	# $ActionRegex = "^$($ActionRegex)";
-	# [CLI] | Get-Member -Static -MemberType Method | % {
-	# 	if ($_.Name -match $ActionRegex) {
-	# 		$Action = $_.Name;
-	# 		return;
-	# 	}
-	# }
-	# if (!([CLI] | Get-Member -Name $Action -Static)) {
-	# 	throw "Unknown operation `"$($Action)`"";
-	# }
-	# [CLI]::$Action($Args[1..$Args.Length]);
+	if (!$args.Length) {
+		$currentTaskId = Task-Current
+		if ($currentTaskId) {
+			Write-Host "$(Task-Prefix)-$($currentTaskId)`t$(Task-Description $currentTaskId)";
+		}
+		return;
+	}
+	$action = Action-Get $args[0]
+	if (!$action) {
+		"Unknown operation `"$($action)`""
+	}
+	[CLI]::$action($args[1..$args.Length])
 }
 
 function Check-Setup {
@@ -36,7 +27,7 @@ function Check-Setup {
 	if (-not (Config-Exists)) {
 		Config-Create
 	}
-	[hashtable] $repoConfig = (Config-Get).repositories[(Hg-Current)]
+	$repoConfig = (Config-Get).repositories[(Hg-Current)]
 	if (-not $repoConfig.bookmark) {
 		throw "Main bookmark property is unset";
 	}
@@ -57,9 +48,23 @@ function Check-Setup {
 	}
 }
 
+function Action-Get($action) {
+	$actionRegex = '^' + ($action -split '' -match '[a-z]' -join '.*')
+	[CLI] | Get-Member -Static -MemberType Method | % {
+		if ($_.Name -match $actionRegex) {
+			$action = $_.Name
+			return
+		}
+	}
+	if (!([CLI] | Get-Member -Name $action -Static)) {
+		return $null
+	}
+	return $action
+}
+
 try {
-	Main @Args;
+	Main @args
 } catch {
-	Write-Host $_ -ForegroundColor Red;
-	exit 1;
+	Write-Host $_ -ForegroundColor Red
+	exit 1
 }

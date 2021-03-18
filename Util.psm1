@@ -49,7 +49,24 @@ function Config-Save([hashtable] $data) {
 	$data | ConvertTo-Json -Depth 16 | Out-File -FilePath (Config-Path);
 }
 
-function Task-Current {}
+function Task-Current {
+	if (Hg-Bookmark -match "^$(Task-Prefix)-(\d+)$") {
+		return $matches.0
+	} else {
+		return $null
+	}
+}
+
+function Task-Description ($ID) {
+	return (Config-Get).repositories[(Hg-Current)].bookmarks["$(Task-Prefix)-$($ID)"]
+}
+
+function Task-Prefix {
+	return (Config-Get).repositories[(Hg-Current)].prefix
+}
+
 function Task-Create {}
 function Task-Exists {}
 function Task-Find {}
+
+Export-ModuleMember -Function *
