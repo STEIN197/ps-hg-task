@@ -14,7 +14,7 @@ function Main {
 	if (!$action) {
 		"Unknown operation `"$($action)`""
 	}
-	Config-Setup-Hg
+	Config-Setup
 	if ($action.ToLower() -ne 'config') {
 		Check-Config
 	}

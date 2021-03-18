@@ -52,7 +52,7 @@ function Config-Save([hashtable] $data) {
 	$data | ConvertTo-Json -Depth 16 | Out-File -FilePath (Config-Path);
 }
 
-function Config-Setup-Hg {
+function Config-Setup {
 	$config = Config-Get
 	if (!$config.repositories[(Hg-Current)]) {
 		$config.repositories[(Hg-Current)] = @{
