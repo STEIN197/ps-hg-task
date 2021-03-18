@@ -1,10 +1,3 @@
-class Util {
-	
-	static [boolean] IsNumeric([string] $String) {
-		return $String -match '^\d+$';
-	}
-}
-
 function Is-Numeric([string] $string) {
 	return $string -match '^\d+$'
 }
@@ -22,16 +15,16 @@ function Hg-Bookmarks {
 	return (hg bookmarks --template '{bookmark}\n') -split '^n'
 }
 
-function Hg-Active-Bookmark {
+function Hg-Bookmark {
 	return hg log -r . --template '{activebookmark}'
 }
 
-function Hg-Current-Path {
+function Hg-Current {
 	$currentItem = Get-Item -Path .;
 	while ($currentItem -ne $null -and !(Test-Path "$($currentItem.FullName)\.hg")) {
 		$currentItem = $currentItem.Parent
 	}
-	return $currentItem ?? $currentItem.FullName
+	return $currentItem ? $currentItem.FullName : $null
 }
 
 function Config-Exists {
@@ -47,13 +40,16 @@ function Config-Path {
 }
 
 function Config-Get {
-	return Get-Content -Path Config-Path -Raw | ConvertFrom-Json -AsHashtable ?? @{
+	return (Get-Content -Path (Config-Path) -Raw | ConvertFrom-Json -AsHashtable) ?? @{
 		repositories = @{}
 	}
 }
 
 function Config-Save([hashtable] $data) {
-	$data | ConvertTo-Json -Depth 16 | Out-File -FilePath Config-Path;
+	$data | ConvertTo-Json -Depth 16 | Out-File -FilePath (Config-Path);
 }
 
-Export-ModuleMember -Function *
+function Task-Current {}
+function Task-Create {}
+function Task-Exists {}
+function Task-Find {}
