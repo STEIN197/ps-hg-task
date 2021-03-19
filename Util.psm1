@@ -74,7 +74,7 @@ function Config-Setup {
 
 function Task-Current {
 	if (Hg-Bookmark -match "^$(Task-Prefix)-(\d+)$") {
-		return $matches.0
+		return $matches[1]
 	} else {
 		return $null
 	}
