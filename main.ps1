@@ -12,7 +12,7 @@ function Main {
 	}
 	$action = Action-Get $args[0]
 	if (!$action) {
-		"Unknown operation `"$($action)`""
+		throw "Unknown operation `"$($args[0])`""
 	}
 	Config-Setup
 	if ($action.ToLower() -ne 'config') {
