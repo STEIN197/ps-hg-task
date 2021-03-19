@@ -44,7 +44,7 @@ function Check-Config {
 	if (-not $repoConfig.branch) {
 		throw "Branch property is unset"
 	}
-	(hg bookmarks -T '{bookmarks},{branch}\n') -split '^n' | % {
+	(hg bookmarks -T '{bookmarks},{branch}\n') -split '`n' | % {
 		$book, $branch = $_ -split ','
 		if ($book -eq $repoConfig.bookmark -and $branch -ne $repoConfig.branch) {
 			throw "Bookmark `"$($Book)`" does not belong to branch `"$($RepoConfig.branch)`""

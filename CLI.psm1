@@ -108,7 +108,38 @@ class CLI {
 		hg update $mainBookmark
 	}
 
-	# static [void] Push([string[]] $params) {}
+	static [void] Push([string[]] $params) {
+		if ($params[0]) {
+			[string] $query = $params[0]
+			[int[]] $tasks = Task-Find $query
+			switch ($tasks.Length) {
+				0 {
+					throw "Can't find task with ID or description `"$($query)`"";
+				}
+				1 {
+					break
+				}
+				default {
+					throw "Task ID or description `"$($query)`" is ambiguous. There are $($tasks.Length) tasks that match this query"
+				}
+			}
+			[string] $bookmark = "$(Task-Prefix)-$($tasks[0])"
+		} else {
+			[int] $taskId = Task-Current
+			if (!$taskId) {
+				throw 'Current bookmark is not task'
+			}
+			[string] $bookmark = "$(Task-Prefix)-$($tasks[0])"
+		}
+		(hg bookmarks --template '{bookmarks},{phase}') -split '`n' | % {
+			$book, $phase = $_ -split ','
+			if ($book -eq $bookmark -and $phase -eq 'secret') {
+				throw "Bookmark `"$bookmark`" is in secret phase"
+			}
+		}
+		hg push -B $bookmark
+	}
+
 	# static [void] Apply([string[]] $params) {}
 	# static [void] Merge([string[]] $params) {}
 

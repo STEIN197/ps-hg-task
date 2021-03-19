@@ -105,6 +105,7 @@ function Task-Exists($id) {
 	return (Hg-Bookmarks).Contains("$(Task-Prefix)-$($id)");
 }
 
+# TODO: Place exceptions here
 function Task-Find($query) {
 	$result = @()
 	$repoBookmarks = (Config-Get).repositories.(Hg-Current).bookmarks
