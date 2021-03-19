@@ -1,4 +1,4 @@
-Import-Module $PSScriptRoot\Util -DisableNameChecking
+Import-Module $PSScriptRoot\util -DisableNameChecking
 
 class CLI {
 
@@ -129,7 +129,7 @@ class CLI {
 			if (!$taskId) {
 				throw 'Current bookmark is not task'
 			}
-			[string] $bookmark = "$(Task-Prefix)-$($tasks[0])"
+			[string] $bookmark = "$(Task-Prefix)-$($taskId)"
 		}
 		(hg bookmarks --template '{bookmarks},{phase}') -split '`n' | % {
 			$book, $phase = $_ -split ','
