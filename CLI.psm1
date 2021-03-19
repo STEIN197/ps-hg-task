@@ -10,12 +10,15 @@ class CLI {
 				throw "Can't find task with ID or description `"$($query)`"";
 			}
 			1 {
-				$taskId = $tasks[0]
+				$bookmark = "$(Task-Prefix)-$($tasks[0])"
+				if ((Hg-Bookmark) -eq $bookmark) {
+					return
+				}
 				hg shelve -A
-				hg update "$(Task-Prefix)-$($taskId)"
+				hg update $bookmark
 				Hg-Shelve-List | % {
-					if ($_ -eq "$(Task-Prefix)-$($taskId)") {
-						hg unshelve -n "$(Task-Prefix)-$($taskId)"
+					if ($_ -eq $bookmark) {
+						hg unshelve -n $bookmark
 						return
 					}
 				}
@@ -28,16 +31,23 @@ class CLI {
 
 	static [void] List([string[]] $params) {
 		$bookmarksConfig = (Config-Get).repositories[(Hg-Current)].bookmarks
+		$currentBookmark = Hg-Bookmark
+		$shelves = Hg-Shelve-List
 		Hg-Bookmarks | % {
 			if (-not ($_ -match "^$(Task-Prefix)-\d+$")) {
 				return
 			}
 			$description = $bookmarksConfig[$_]
 			$output = $_
-			if ($description) {
-				$output += "`t$($description)"
+			if ($_ -in $shelves) {
+				$output += " | shelved"
+			} else {
+				$output += " |        "
 			}
-			Write-Host $output
+			if ($description) {
+				$output += " | $($description)"
+			}
+			Write-Host $output -ForegroundColor $($_ -eq $currentBookmark ? 'Green' : 'White')
 		}
 	}
 
@@ -89,7 +99,7 @@ class CLI {
 		}
 	}
 
-	static [void] Reset([string[]] $Params) {
+	static [void] Unset([string[]] $Params) {
 		$mainBookmark = (Config-Get).repositories.(Hg-Current).bookmark
 		if ((Hg-Bookmark) -eq $mainBookmark) {
 			return
@@ -97,6 +107,10 @@ class CLI {
 		hg shelve -A
 		hg update $mainBookmark
 	}
+
+	# static [void] Push([string[]] $params) {}
+	# static [void] Apply([string[]] $params) {}
+	# static [void] Merge([string[]] $params) {}
 
 	static [void] Config([string[]] $params) {
 		[string] $key = $params[0]

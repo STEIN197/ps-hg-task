@@ -100,6 +100,7 @@ function Task-Create($id, $description) {
 		Config-Save $config
 	}
 }
+
 function Task-Exists($id) {
 	return (Hg-Bookmarks).Contains("$(Task-Prefix)-$($id)");
 }
