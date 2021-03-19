@@ -2,25 +2,29 @@ Import-Module $PSScriptRoot\Util -DisableNameChecking
 
 class CLI {
 
-	# # TODO
-	# static [void] Jump([string[]] $Params) {
-	# 	[string] $Query = $Params[0];
-	# 	[Task[]] $Tasks = [Task]::Find($Query);
-	# 	switch ($Tasks.Length) {
-	# 		0 {
-	# 			throw "Can't find task with ID or description `"$($Query)`"";
-	# 		}
-	# 		1 {
-	# 			[Mercurial] $Repo = [Mercurial]::Current();
-	# 			# $Repo.Shelve();
-	# 			# $Repo.Update("$([Task]::Prefix())-$($Tasks[0].ID)");
-	# 			# $Repo.Unshelve("$([Task]::Prefix())-$($Tasks[0].ID)");
-	# 		}
-	# 		default {
-	# 			throw "Task ID or description `"$($Query)`" is ambiguous. There are $($Tasks.Length) tasks that fall into this query";
-	# 		}
-	# 	}
-	# }
+	static [void] Jump([string[]] $params) {
+		[string] $query = $params[0]
+		[int[]] $tasks = Task-Find $query
+		switch ($tasks.Length) {
+			0 {
+				throw "Can't find task with ID or description `"$($query)`"";
+			}
+			1 {
+				$taskId = $tasks[0]
+				hg shelve -A
+				hg update "$(Task-Prefix)-$($taskId)"
+				Hg-Shelve-List | % {
+					if ($_ -eq "$(Task-Prefix)-$($taskId)") {
+						hg unshelve -n "$(Task-Prefix)-$($taskId)"
+						return
+					}
+				}
+			}
+			default {
+				throw "Task ID or description `"$($query)`" is ambiguous. There are $($tasks.Length) tasks that match this query"
+			}
+		}
+	}
 
 	static [void] List([string[]] $params) {
 		$bookmarksConfig = (Config-Get).repositories[(Hg-Current)].bookmarks

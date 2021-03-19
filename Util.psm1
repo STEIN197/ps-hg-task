@@ -27,6 +27,13 @@ function Hg-Current {
 	return $currentItem ? $currentItem.FullName : $null
 }
 
+function Hg-Shelve-List {
+	return (hg shelve -l) -split '`n' | % {
+		$_ -match '^(.+?)\s+' > $null
+		return $matches[1]
+	}
+}
+
 function Config-Exists {
 	return Test-Path -Path "$($PSScriptRoot)\config.json"
 }
@@ -96,6 +103,17 @@ function Task-Create($id, $description) {
 function Task-Exists($id) {
 	return (Hg-Bookmarks).Contains("$(Task-Prefix)-$($id)");
 }
-function Task-Find {}
+
+function Task-Find($query) {
+	$result = @()
+	$repoBookmarks = (Config-Get).repositories.(Hg-Current).bookmarks
+	Hg-Bookmarks | % {
+		if ($_ -match "^$(Task-Prefix)-\d*$($query)\d*$" -or $repoBookmarks.$_ -match $query) {
+			$parts = $_ -split '-';
+			$result += [int] $parts[$parts.Length - 1];
+		}
+	}
+	return $result
+}
 
 Export-ModuleMember -Function *
