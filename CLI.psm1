@@ -58,8 +58,36 @@ class CLI {
 		}
 	}
 
-	# # TODO
-	# static [void] Delete([string[]] $Params) {}
+	# TODO: Delete branch?
+	static [void] Delete([string[]] $params) {
+		[string] $query = $params[0]
+		[int[]] $tasks = Task-Find $query
+		switch ($tasks.Length) {
+			0 {
+				throw "Can't find task with ID or description `"$($query)`"";
+			}
+			1 {
+				[string] $bookmark = "$(Task-Prefix)-$($tasks[0])"
+				[hashtable] $config = Config-Get
+				if ((Hg-Bookmark) -eq $bookmark) {
+					hg shelve -A
+					hg update $config.repositories.(Hg-Current).bookmark
+				}
+				hg bookmark -d $bookmark
+				Hg-Shelve-List | % {
+					if ($_ -eq $bookmark) {
+						hg shelve -d $bookmark
+						return
+					}
+				}
+				$config.repositories.(Hg-Current).bookmarks.Remove($bookmark)
+				Config-Save $config
+			}
+			default {
+				throw "Task ID or description `"$($query)`" is ambiguous. There are $($tasks.Length) tasks that match this query"
+			}
+		}
+	}
 
 	static [void] Reset([string[]] $Params) {
 		$mainBookmark = (Config-Get).repositories.(Hg-Current).bookmark
