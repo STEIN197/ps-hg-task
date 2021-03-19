@@ -61,17 +61,14 @@ class CLI {
 	# # TODO
 	# static [void] Delete([string[]] $Params) {}
 
-	# static [void] Reset([string[]] $Params) {
-	# 	[Mercurial] $Repo = [Mercurial]::Current();
-	# 	[Config] $Config = [Config]::Get();
-	# 	[hashtable] $RepoConfig = $Config.Data.repositories[$Repo.ToString()];
-
-	# 	if ($Repo.GetActiveBookmark() -eq $RepoConfig.bookmark) {
-	# 		return;
-	# 	}
-	# 	$Repo.Shelve();
-	# 	$Repo.Update($RepoConfig.bookmark);
-	# }
+	static [void] Reset([string[]] $Params) {
+		$mainBookmark = (Config-Get).repositories.(Hg-Current).bookmark
+		if ((Hg-Bookmark) -eq $mainBookmark) {
+			return
+		}
+		hg shelve -A
+		hg update $mainBookmark
+	}
 
 	static [void] Config([string[]] $params) {
 		[string] $key = $params[0]
