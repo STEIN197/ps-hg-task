@@ -78,6 +78,10 @@ class CLI {
 		}
 		if ($key -and $value) {
 			$config = Config-Get
+			$currentValue = $config.repositories[(Hg-Current)][$key.ToLower()]
+			if ($currentValue) {
+				throw 'Changing value is not allowed'
+			}
 			$config.repositories[(Hg-Current)][$key.ToLower()] = $value
 			Config-Save $config
 		} elseif ($Key) {
