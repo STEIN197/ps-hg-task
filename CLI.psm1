@@ -1,4 +1,4 @@
-Import-Module $PSScriptRoot\Util -DisableNameChecking
+Import-Module $PSScriptRoot\util -DisableNameChecking
 
 class CLI {
 

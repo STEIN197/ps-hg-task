@@ -2,15 +2,6 @@ function Is-Numeric([string] $string) {
 	return $string -match '^\d+$'
 }
 
-function Hg-Installed {
-	try {
-		hg > $null
-		return $true
-	} catch {
-		return $false
-	}
-}
-
 function Hg-Bookmarks {
 	return (hg bookmarks --template '{bookmark}\n') -split '^n'
 }

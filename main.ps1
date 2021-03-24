@@ -1,5 +1,5 @@
 using module .\CLI.psm1
-Import-Module $PSScriptRoot\Util -DisableNameChecking
+Import-Module $PSScriptRoot\util -DisableNameChecking
 
 function Main {
 	Check-Setup
@@ -22,9 +22,6 @@ function Main {
 }
 
 function Check-Setup {
-	if (-not (Hg-Installed)) {
-		throw "Mercurial is not installed on this computer"
-	}
 	if (-not (Hg-Current)) {
 		throw "Mercurial repository does not exist here"
 	}
