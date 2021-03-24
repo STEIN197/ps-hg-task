@@ -53,6 +53,9 @@ function Check-Config {
 	if (-not $repoConfig.prefix) {
 		throw "Prefix property is unset"
 	}
+	if ((hg branch) -ne $repoConfig.branch) {
+		throw "You're not at $($repoConfig.branch) branch"
+	}
 }
 
 function Action-Get($action) {

@@ -105,7 +105,6 @@ function Task-Exists($id) {
 	return (Hg-Bookmarks).Contains("$(Task-Prefix)-$($id)");
 }
 
-# TODO: Place exceptions here
 function Task-Find($query) {
 	$result = @()
 	$repoBookmarks = (Config-Get).repositories.(Hg-Current).bookmarks
@@ -115,7 +114,17 @@ function Task-Find($query) {
 			$result += [int] $parts[$parts.Length - 1];
 		}
 	}
-	return $result
+	switch ($result.Length) {
+		0 {
+			throw "Can't find task with ID or description `"$($query)`"";
+		}
+		1 {
+			return $result[0]
+		}
+		default {
+			throw "Task ID or description `"$($query)`" is ambiguous. There are $($tasks.Length) tasks that match this query"
+		}
+	}
 }
 
 Export-ModuleMember -Function *
